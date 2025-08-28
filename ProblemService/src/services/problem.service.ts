@@ -2,6 +2,7 @@ import { IProblem } from '../models/problem.model';
 import { CreateProblemDto, UpdateProblemDto } from '../dtos/problem.dto';
 import { IProblemRepository } from '../repositories/problem.repository';
 import { BadRequestError, NotFoundError } from '../utils/errors/app.error';
+import { sanitizeMarkdown } from '../utils/markdown.sanitize';
 
 export interface IProblemService {
 	createProblem(problem: CreateProblemDto): Promise<IProblem>;
@@ -23,8 +24,13 @@ export class ProblemService implements IProblemService {
 	}
 
 	async createProblem(problem: CreateProblemDto): Promise<IProblem> {
-		// TODO: sanitize the markup
-		return this.problemRepository.createProblem(problem);
+		const sanitizedProblem = {
+			...problem,
+			description: await sanitizeMarkdown(problem.description),
+			editorial:
+				problem.editorial && (await sanitizeMarkdown(problem.editorial)),
+		};
+		return this.problemRepository.createProblem(sanitizedProblem);
 	}
 
 	async getProblemById(id: string): Promise<IProblem | null> {
@@ -47,8 +53,20 @@ export class ProblemService implements IProblemService {
 		if (!existingProblem) {
 			throw new NotFoundError('Problem not found');
 		}
-		// TODO: sanitize the markup
-		return this.problemRepository.updateProblem(id, problem);
+		const sanitizedProblem: Partial<IProblem> = {
+			...problem,
+		};
+		if (problem.description) {
+			sanitizedProblem.description = await sanitizeMarkdown(
+				problem.description
+			);
+		}
+		if (problem.editorial) {
+			sanitizedProblem.editorial = await sanitizeMarkdown(
+				problem.editorial
+			);
+		}
+		return this.problemRepository.updateProblem(id, sanitizedProblem);
 	}
 
 	async deleteProblem(id: string): Promise<boolean> {
