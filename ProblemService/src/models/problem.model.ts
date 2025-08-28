@@ -6,6 +6,7 @@ export interface ITestCase {
 }
 
 export interface IProblem extends Document {
+	id: string;
 	title: string;
 	description: string;
 	difficulty: 'easy' | 'medium' | 'hard';
@@ -55,6 +56,13 @@ const problemSchema = new mongoose.Schema<IProblem>(
 	{
 		timestamps: true,
 		versionKey: false,
+		toJSON: {
+			transform: (_, ret) => {
+				delete (ret as any).__v;
+				ret.id = ret._id.toString();
+				delete (ret as any)._id;
+			},
+		},
 	}
 );
 
