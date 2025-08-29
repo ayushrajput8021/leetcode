@@ -9,6 +9,7 @@ import {
 import logger from './config/logger.config';
 import { attachCorrelationIdMiddleware } from './middlewares/correlation.middleware';
 import { redisClient } from './config/redis.config';
+import { setupWorkers } from './workers/evaluation.worker';
 const app = express();
 
 app.use(express.json());
@@ -32,4 +33,5 @@ app.listen(serverConfig.PORT, async () => {
 	logger.info(`Server is running on http://localhost:${serverConfig.PORT}`);
 	logger.info(`Press Ctrl+C to stop the server.`);
 	await redisClient.ping();
+	await setupWorkers();
 });

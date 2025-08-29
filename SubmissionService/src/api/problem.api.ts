@@ -32,12 +32,15 @@ export async function getProblemById(
 		const response: AxiosResponse<IProblemResponse> = await axios.get(
 			`${serverConfig.PROBLEM_SERVICE_URL}/problems/${problemId}`
 		);
-		if (!response.data.success) {
+
+		if (response.data.success) {
 			throw new InternalServerError(response.data.message);
 		}
 		return response.data.data;
 	} catch (error) {
-		logger.error(`Error fetching problem details: ${error}`);
+		logger.error(
+			`Error fetching problem details: ${JSON.stringify(error, null, 2)}`
+		);
 		return null;
 	}
 }
