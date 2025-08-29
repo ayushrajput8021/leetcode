@@ -1,7 +1,13 @@
 import { getProblemById } from '../api/problem.api';
 import { ISubmission, SubmissionStatus } from '../models/submission.model';
 import { ISubmissionRepository } from '../repositories/submission.model';
-import { BadRequestError, NotFoundError } from '../utils/errors/app.error';
+import {
+	BadRequestError,
+	InternalServerError,
+	NotFoundError,
+} from '../utils/errors/app.error';
+import { addSubmissionToQueue } from '../producers/submission.producer';
+import logger from '../config/logger.config';
 
 export interface ISubmissionService {
 	createSubmission(submission: Partial<ISubmission>): Promise<ISubmission>;
@@ -30,7 +36,16 @@ export class SubmissionService implements ISubmissionService {
 		const submission = await this.submissionRepository.createSubmission(
 			submissionData
 		);
-		// TODO: add submission to queue
+		const jobId = await addSubmissionToQueue({
+			submissionId: submission.id,
+			problem,
+			code: submission.code,
+			language: submission.language,
+		});
+		logger.info(`Submission job ${jobId} added to queue`);
+		if (!jobId) {
+			throw new InternalServerError('Failed to add submission to queue');
+		}
 		return submission;
 	}
 

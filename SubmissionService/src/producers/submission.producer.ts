@@ -1,7 +1,7 @@
-import { submissionQueue } from '../src/queues/submission.queue';
-import { IProblemDetails } from '../src/api/problem.api';
-import { SubmissionLanguage } from '../src/models/submission.model';
-import logger from '../src/config/logger.config';
+import { submissionQueue } from '../queues/submission.queue';
+import { IProblemDetails } from '../api/problem.api';
+import { SubmissionLanguage } from '../models/submission.model';
+import logger from '../config/logger.config';
 
 export interface ISubmissionJob {
 	submissionId: string;
