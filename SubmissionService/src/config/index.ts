@@ -5,6 +5,7 @@ type ServerConfig = {
 	PORT: number;
 	DATABASE_URL: string;
 	REDIS_URL: string;
+	PROBLEM_SERVICE_URL: string;
 };
 
 function loadEnv() {
@@ -19,4 +20,6 @@ export const serverConfig: ServerConfig = {
 	DATABASE_URL:
 		process.env.DATABASE_URL || 'mongodb://localhost:27017/mydatabase',
 	REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
+	PROBLEM_SERVICE_URL:
+		process.env.PROBLEM_SERVICE_URL || 'http://localhost:3000',
 };
