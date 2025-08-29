@@ -1,19 +1,26 @@
-import Redis from 'ioredis';
+import Redis, { RedisOptions } from 'ioredis';
 import logger from './logger.config';
 import { serverConfig } from '.';
 
-const redisConfig = {
-	url: serverConfig.REDIS_URL,
+const redisConfig: RedisOptions = {
+	host: serverConfig.REDIS_HOST,
+	port: serverConfig.REDIS_PORT,
 	maxRetriesPerRequest: null,
-	enableReadyCheck: true,
-	showFriendlyErrorStack: true,
+	retryStrategy: (times: number) => {
+		if (times > 3) {
+			return null;
+		}
+		return Math.min(times * 50, 1000);
+	},
 };
 
-const redisClient = new Redis(redisConfig);
-
-redisClient.on('error', (err) => logger.error('Redis Client Error', err));
+export const redisClient = new Redis(redisConfig);
 
 redisClient.on('connect', () => logger.info('Connected to Redis'));
+
+redisClient.on('end', () => logger.info('Redis connection closed'));
+
+redisClient.on('error', (err) => logger.error('Redis Client Error', err));
 
 /**
  * Create a new Redis connection
