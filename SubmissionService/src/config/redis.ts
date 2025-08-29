@@ -19,4 +19,4 @@ redisClient.on('connect', () => logger.info('Connected to Redis'));
  * Create a new Redis connection
  * @returns Redis client
  */
-export const createNewRedisConnection = async () => new Redis(redisConfig);
+export const createNewRedisConnection = () => new Redis(redisConfig);
