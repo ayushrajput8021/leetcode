@@ -7,10 +7,11 @@ export interface RunCodeOptions {
 	code: string;
 	language: 'python' | 'cpp' | 'java';
 	timeout: number;
+	input: string;
 }
 
 export async function runCode(options: RunCodeOptions) {
-	const { code, language, timeout } = options;
+	const { code, language, timeout, input } = options;
 
 	const timeLimitExceededTimeout = setTimeout(() => {
 		console.log('Time limit exceeded');
@@ -26,7 +27,7 @@ export async function runCode(options: RunCodeOptions) {
 				: language === 'cpp'
 				? CPP_IMAGE
 				: '',
-		cmdExecutable: commands[language](code),
+		cmdExecutable: commands[language](code, input),
 		memoryLimit: 1024 * 1024 * 1024,
 	});
 	await container?.start();
@@ -37,7 +38,11 @@ export async function runCode(options: RunCodeOptions) {
 		stderr: true,
 		stdout: true,
 	});
-	console.log('Logs: ', logs?.toString());
+
+	const sampleOutput = '8';
+	const containerLogs = processLogs(logs);
+	console.log('Container Logs: ', containerLogs);
+	console.log('Sample Output: ', containerLogs === sampleOutput);
 	await container?.remove();
 	clearTimeout(timeLimitExceededTimeout);
 	if (status?.StatusCode == 0) {
@@ -45,4 +50,15 @@ export async function runCode(options: RunCodeOptions) {
 	} else {
 		console.log('container killed due to error');
 	}
+}
+
+function processLogs(logs: Buffer | undefined) {
+	return logs
+		?.toString()
+		.replace(/\x00/g, '')
+		.replace(/\x1b\[[0-9;]*m/g, '')
+		.replace(/[\x00-\x1f-]/g, '')
+		.replace(/\n/g, '')
+		.replace(/\r/g, '')
+		.trim();
 }

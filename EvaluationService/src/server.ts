@@ -49,7 +49,7 @@ for i in range(10):
    time.sleep(10)
    print(i * 2, "Hello, World")
 	`;
-	await runCode({ code, language: 'python', timeout: 1000 });
+	await runCode({ code, language: 'python', timeout: 1000, input: '' });
 }
 
 async function testCPPCodeRunner() {
@@ -57,9 +57,13 @@ async function testCPPCodeRunner() {
 #include <iostream>
 using namespace std;
 int main() {
-	cout << "Hello, World!" << endl;
+  int n;
+  cin >> n;
+  for (int i = 0; i < n; i++) {
+    cout << i * 2 << endl;
+  }
 	return 0;
 }
 	`;
-	await runCode({ code, language: 'cpp', timeout: 1000 });
+	await runCode({ code, language: 'cpp', timeout: 1000, input: '5' });
 }
