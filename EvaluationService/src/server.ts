@@ -11,6 +11,7 @@ import { attachCorrelationIdMiddleware } from './middlewares/correlation.middlew
 import { redisClient } from './config/redis.config';
 import { setupWorkers } from './workers/evaluation.worker';
 import { pullAllImages } from './utils/containers/pullImage.util';
+
 const app = express();
 
 app.use(express.json());
