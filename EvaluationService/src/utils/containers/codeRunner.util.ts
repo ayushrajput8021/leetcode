@@ -1,4 +1,4 @@
-import { PYTHON_IMAGE } from '../constants';
+import { CPP_IMAGE, PYTHON_IMAGE } from '../constants';
 import { createNewDockerContainer } from './createContainer.util';
 
 import { commands } from './commands.util';
@@ -20,7 +20,12 @@ export async function runCode(options: RunCodeOptions) {
 	}, timeout);
 
 	const container = await createNewDockerContainer({
-		imageName: PYTHON_IMAGE,
+		imageName:
+			language === 'python'
+				? PYTHON_IMAGE
+				: language === 'cpp'
+				? CPP_IMAGE
+				: '',
 		cmdExecutable: commands[language](code),
 		memoryLimit: 1024 * 1024 * 1024,
 	});
