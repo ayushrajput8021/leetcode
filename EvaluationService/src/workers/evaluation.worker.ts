@@ -2,6 +2,9 @@ import { Job, Worker } from 'bullmq';
 import { SUBMISSION_QUEUE } from '../utils/constants';
 import logger from '../config/logger.config';
 import { createNewRedisConnection } from '../config/redis.config';
+import { EvaluationJobData } from '../interfaces/evaluation.interface';
+import { runCode } from '../utils/containers/codeRunner.util';
+import { LANGUAGE_CONFIG } from '../config/language.config';
 
 async function setupEvaluationWorker() {
 	const evaluationWorker = new Worker(
@@ -10,7 +13,29 @@ async function setupEvaluationWorker() {
 			logger.info(
 				`Evaluation worker started for job ${job.id} with data ${job.data}`
 			);
-			return 'Evaluation worker started';
+			// return 'Evaluation worker started';
+			const data: EvaluationJobData = job.data;
+			console.log('Data: ', data);
+
+			try {
+				const testCasesRunnerPromises = data.problem.testCases.map(
+					async (testCase) => {
+						return await runCode({
+							code: data.code,
+							language: data.language,
+							timeout: LANGUAGE_CONFIG[data.language].timeout,
+							input: testCase.input,
+						});
+					}
+				);
+				const testCasesResults = await Promise.all(testCasesRunnerPromises);
+
+
+				console.log('Result: ', testCasesResults);
+				return testCasesResults;
+			} catch (error) {
+				logger.error('Error running code', error);
+			}
 		},
 		{
 			connection: createNewRedisConnection(),

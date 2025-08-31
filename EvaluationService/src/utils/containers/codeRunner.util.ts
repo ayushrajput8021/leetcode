@@ -13,10 +13,14 @@ export interface RunCodeOptions {
 export async function runCode(options: RunCodeOptions) {
 	const { code, language, timeout, input } = options;
 
+	let isTimeLimitExceeded = false;
 	const timeLimitExceededTimeout = setTimeout(() => {
+		isTimeLimitExceeded = true;
 		console.log('Time limit exceeded');
-		container?.kill();
 
+		container?.stop();
+
+		container?.remove({ force: true });
 		return;
 	}, timeout);
 
@@ -34,21 +38,33 @@ export async function runCode(options: RunCodeOptions) {
 
 	const status = await container?.wait();
 
+	if (isTimeLimitExceeded) {
+		return {
+			status: 'time_limit_exceeded',
+			output: 'Time limit exceeded',
+		};
+	}
+
 	const logs = await container?.logs({
 		stderr: true,
 		stdout: true,
 	});
 
-	const sampleOutput = '8';
 	const containerLogs = processLogs(logs);
-	console.log('Container Logs: ', containerLogs);
-	console.log('Sample Output: ', containerLogs === sampleOutput);
-	await container?.remove();
+
+	await container?.remove({ force: true });
+
 	clearTimeout(timeLimitExceededTimeout);
 	if (status?.StatusCode == 0) {
-		console.log('container killed due to timeout');
+		return {
+			status: 'success',
+			output: containerLogs,
+		};
 	} else {
-		console.log('container killed due to error');
+		return {
+			status: 'time_limit_exceeded',
+			output: containerLogs,
+		};
 	}
 }
 

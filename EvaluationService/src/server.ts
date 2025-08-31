@@ -11,7 +11,6 @@ import { attachCorrelationIdMiddleware } from './middlewares/correlation.middlew
 import { redisClient } from './config/redis.config';
 import { setupWorkers } from './workers/evaluation.worker';
 import { pullAllImages } from './utils/containers/pullImage.util';
-import { runCode } from './utils/containers/codeRunner.util';
 
 const app = express();
 
@@ -38,32 +37,32 @@ app.listen(serverConfig.PORT, async () => {
 	await redisClient.ping();
 	await setupWorkers();
 	await pullAllImages();
-	await testCodeRunner();
-	await testCPPCodeRunner();
+	// await testCodeRunner();
+	// await testCPPCodeRunner();
 });
 
-async function testCodeRunner() {
-	const code = `
-for i in range(10):
-   import time
-   time.sleep(10)
-   print(i * 2, "Hello, World")
-	`;
-	await runCode({ code, language: 'python', timeout: 1000, input: '' });
-}
+// async function testCodeRunner() {
+// 	const code = `
+// for i in range(10):
+//    import time
+//    time.sleep(10)
+//    print(i * 2, "Hello, World")
+// 	`;
+// 	await runCode({ code, language: 'python', timeout: 1000, input: '' });
+// }
 
-async function testCPPCodeRunner() {
-	const code = `
-#include <iostream>
-using namespace std;
-int main() {
-  int n;
-  cin >> n;
-  for (int i = 0; i < n; i++) {
-    cout << i * 2 << endl;
-  }
-	return 0;
-}
-	`;
-	await runCode({ code, language: 'cpp', timeout: 1000, input: '5' });
-}
+// async function testCPPCodeRunner() {
+// 	const code = `
+// #include <iostream>
+// using namespace std;
+// int main() {
+//   int n;
+//   cin >> n;
+//   for (int i = 0; i < n; i++) {
+//     cout << i * 2 << endl;
+//   }
+// 	return 0;
+// }
+// 	`;
+// 	await runCode({ code, language: 'cpp', timeout: 1000, input: '5' });
+// }
