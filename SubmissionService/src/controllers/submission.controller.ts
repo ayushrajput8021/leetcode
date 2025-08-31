@@ -57,7 +57,8 @@ export const SubmissionController: ISubmissionController = {
 	async updateSubmissionStatus(req: Request, res: Response): Promise<void> {
 		const submission = await submissionService.updateSubmissionStatus(
 			req.params.id,
-			req.body.status
+			req.body.status,
+			req.body.submissionData
 		);
 		res.status(200).json({
 			status: true,

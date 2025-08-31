@@ -1,4 +1,5 @@
 export interface ITestCase {
+	_id: string;
 	input: string;
 	output: string;
 }
@@ -19,4 +20,9 @@ export interface EvaluationJobData {
 	language: 'python' | 'cpp';
 	problem: IProblemDetails;
 	timeout: number;
+}
+
+export interface EvaluationResult {
+	status: 'success' | 'time_limit_exceeded' | 'error' | 'failed';
+	output: string | undefined;
 }

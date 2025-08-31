@@ -1,6 +1,6 @@
 import { CPP_IMAGE, PYTHON_IMAGE } from '../constants';
 import { createNewDockerContainer } from './createContainer.util';
-
+import { EvaluationResult } from '../../interfaces/evaluation.interface';
 import { commands } from './commands.util';
 
 export interface RunCodeOptions {
@@ -10,7 +10,9 @@ export interface RunCodeOptions {
 	input: string;
 }
 
-export async function runCode(options: RunCodeOptions) {
+export async function runCode(
+	options: RunCodeOptions
+): Promise<EvaluationResult> {
 	const { code, language, timeout, input } = options;
 
 	let isTimeLimitExceeded = false;
@@ -62,7 +64,7 @@ export async function runCode(options: RunCodeOptions) {
 		};
 	} else {
 		return {
-			status: 'time_limit_exceeded',
+			status: 'failed',
 			output: containerLogs,
 		};
 	}

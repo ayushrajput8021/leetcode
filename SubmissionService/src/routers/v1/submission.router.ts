@@ -20,6 +20,7 @@ submissionRouter.get(
 
 submissionRouter.delete('/:id', SubmissionController.deleteSubmissionById);
 
+submissionRouter.patch('/:id', SubmissionController.updateSubmissionStatus);
 submissionRouter.get('/health', (req, res) => {
 	res.status(200).send('OK');
 });

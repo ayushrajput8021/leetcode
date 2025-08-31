@@ -2,10 +2,45 @@ import { Job, Worker } from 'bullmq';
 import { SUBMISSION_QUEUE } from '../utils/constants';
 import logger from '../config/logger.config';
 import { createNewRedisConnection } from '../config/redis.config';
-import { EvaluationJobData } from '../interfaces/evaluation.interface';
+import {
+	EvaluationJobData,
+	EvaluationResult,
+	ITestCase,
+} from '../interfaces/evaluation.interface';
 import { runCode } from '../utils/containers/codeRunner.util';
 import { LANGUAGE_CONFIG } from '../config/language.config';
+import { updateSubmissionStatus } from '../api/submission.api';
 
+
+function matchTestCasesWithResults(
+	testCases: ITestCase[],
+	results: EvaluationResult[]
+) {
+	const output: Record<string, string> = {};
+	if (results.length !== testCases.length) {
+		console.log('WA');
+		return;
+	}
+	testCases.map((testCase, index) => {
+		let retval = '';
+		if (results[index].status === 'time_limit_exceeded') {
+			retval = 'TLE';
+		} else if (results[index].status === 'failed') {
+			retval = 'Error';
+		} else {
+			// match the output with the test case output
+			if (results[index].output === testCase.output) {
+				retval = 'AC';
+			} else {
+				retval = 'WA';
+			}
+		}
+
+		output[testCase._id] = retval;
+	});
+
+	return output;
+}
 async function setupEvaluationWorker() {
 	const evaluationWorker = new Worker(
 		SUBMISSION_QUEUE,
@@ -30,9 +65,13 @@ async function setupEvaluationWorker() {
 				);
 				const testCasesResults = await Promise.all(testCasesRunnerPromises);
 
-
-				console.log('Result: ', testCasesResults);
-				return testCasesResults;
+				const output = matchTestCasesWithResults(
+					data.problem.testCases,
+					testCasesResults
+				);
+				console.log('Output: ', output);
+				await updateSubmissionStatus(data.submissionId, 'completed', output as Record<string, string>);
+				return output;
 			} catch (error) {
 				logger.error('Error running code', error);
 			}
