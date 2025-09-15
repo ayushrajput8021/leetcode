@@ -1,4 +1,4 @@
-# LeetCode Clone
+# CodeJudge
 
 A full-stack coding platform that allows users to solve algorithmic problems and get real-time code evaluation in multiple programming languages.
 
